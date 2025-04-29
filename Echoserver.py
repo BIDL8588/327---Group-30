@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 DB_CONFIG = {
     'url': "postgresql://neondb_owner:npg_wnz8jmce2qHh@ep-bitter-pine-a539fzen-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
 }
-def get_database_connection():
+def database_conn():
     try:
         conn = psycopg2.connect(DB_CONFIG['url'], sslmode="require")
         print("Connected to Neon successfully.")
@@ -36,10 +36,15 @@ metadata = {
         "unit": "kWh"
     }
 }
-
+def get_moisture(): 
+    device_id = "fridge"
+    
+    
+    pass
+    
 ##not official function
 def get_average_water_usage(cursor):
-    device_id = "fridge"
+    device_id = "dishwasher"
 
     cursor.execute("""
         SELECT AVG(water_used) FROM dishwasher_cycles
