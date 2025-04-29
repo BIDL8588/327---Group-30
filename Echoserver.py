@@ -35,7 +35,9 @@ def get_average_moisture(cursor):
     return None
 def p_query(query,cursor): 
     pass
-    
+
+
+###############TCP SET UP
 HOST = '10.128.0.2' # local ip address
 PORT = 4000 # port nuber to listen for incoming connections
 
