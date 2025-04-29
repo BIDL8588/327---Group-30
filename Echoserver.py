@@ -36,11 +36,16 @@ metadata = {
         "unit": "kWh"
     }
 }
-def get_moisture(): 
+def get_moisture(cursor): 
     device_id = "fridge"
-    
-    
-    pass
+
+    cursor.execute(""" 
+    SELECT AVG(moisture) FROM fridge
+    WHERE device_id = %s
+    """, (device_id,))
+    result = cursor.fetchone()
+
+
     
 ##not official function
 def get_average_water_usage(cursor):
