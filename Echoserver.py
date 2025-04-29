@@ -2,6 +2,20 @@
 import socket
 from datetime import datetime, timedelta
 
+
+DB_CONFIG = {
+    'url': "postgresql://neondb_owner:npg_wnz8jmce2qHh@ep-bitter-pine-a539fzen-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
+}
+def get_database_connection():
+    try:
+        conn = psycopg2.connect(DB_CONFIG['url'], sslmode="require")
+        print("Connected to Neon successfully.")
+        return conn
+    except Exception as e:
+        print(f"Error connecting to Neon: {e}")
+        return None
+
+
 metadata = {
     "fridge": {
         "device_id": "fridge",
