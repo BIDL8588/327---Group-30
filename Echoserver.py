@@ -36,6 +36,8 @@ metadata = {
         "unit": "kWh"
     }
 }
+
+##not official function
 def get_average_moisture(cursor):
     now = datetime.utcnow()
     start_time = now - timedelta(hours=3)
