@@ -1,7 +1,41 @@
 
 import socket
 
-
+metadata = {
+    "fridge": {
+        "device_id": "fridge",
+        "type": "moisture",
+        "timezone": "UTC",
+        "unit": "percentage"  
+    },
+    "dishwasher": {
+        "device_id": "dishwasher",
+        "type": "water",
+        "timezone": "UTC",
+        "unit": "liters"
+    },
+    "fridge_2": {
+        "device_id": "fridge_2",
+        "type": "electricity",
+        "timezone": "UTC",
+        "unit": "kWh"
+    }
+}
+def get_average_moisture(cursor):
+    now = datetime.utcnow()
+    start_time = now - timedelta(hours=3)
+    cursor.execute("""
+        SELECT value FROM fridge_kitchen_data
+        WHERE reading_time >= ?
+    """, (start_time.strftime("%Y-%m-%d %H:%M:%S"),))
+    rows = cursor.fetchall()
+    if rows:
+        avg_moisture = sum([float(row[0]) for row in rows]) / len(rows)
+        return round(avg_moisture, 2)
+    return None
+def p_query(query,cursor): 
+    pass
+    
 HOST = '10.128.0.2' # local ip address
 PORT = 4000 # port nuber to listen for incoming connections
 
