@@ -27,7 +27,7 @@ while True:
         break
 
     if message not in valid_queries: 
-        print("\n Sorry, this query can't be processed".)
+        print("\n Sorry, this query can't be processed.")
         print("Please try one of the following valid queries:")
         for query in valid_queries:
             print(f"- {query}")
