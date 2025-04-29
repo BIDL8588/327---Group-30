@@ -38,18 +38,22 @@ metadata = {
 }
 
 ##not official function
-def get_average_moisture(cursor):
-    now = datetime.utcnow()
-    start_time = now - timedelta(hours=3)
+def get_average_water_usage(cursor):
+    device_id = "fridge"
+
     cursor.execute("""
-        SELECT value FROM fridge_kitchen_data
-        WHERE reading_time >= ?
-    """, (start_time.strftime("%Y-%m-%d %H:%M:%S"),))
-    rows = cursor.fetchall()
-    if rows:
-        avg_moisture = sum([float(row[0]) for row in rows]) / len(rows)
-        return round(avg_moisture, 2)
-    return None
+        SELECT AVG(water_used) FROM dishwasher_cycles
+        WHERE device_id = %s
+    """, (device_id,))
+    result = cursor.fetchone()
+
+    if result and result[0] is not None:
+        avg_liters = result[0]
+        avg_gallons = avg_liters * 0.264172
+        avg_gallons = round(avg_gallons, 2)
+        return f"The average water consumption per cycle is {avg_gallons} gallons."
+    else:
+        return "No dishwasher water usage data available."
 def p_query(query,cursor): 
     pass
 
