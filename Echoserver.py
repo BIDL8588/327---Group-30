@@ -40,10 +40,16 @@ def get_moisture(cursor):
     device_id = "fridge"
 
     cursor.execute(""" 
-    SELECT AVG(moisture) FROM fridge
-    WHERE device_id = %s
-    """, (device_id,))
+    SELECT AVG(moisture) FROM fridge_data
+    WHERE device_id = %s AND timestamp >= %s
+    """, (device_id, time_limit))
     result = cursor.fetchone()
+
+if result and result[0] is not None: 
+    avg_moisture = round(result[0], 2)
+    return f"The average moisture inside kitchen fridge in the past three hours is {avg_moisture} % RH."
+else:
+    return "No moisture data available in the past three hours."
 
 
     
