@@ -51,8 +51,6 @@ if result and result[0] is not None:
 else:
     return "No moisture data available in the past three hours."
 
-
-    
 ##not official function
 def get_average_water_usage(cursor):
     device_id = "dishwasher"
@@ -70,8 +68,38 @@ def get_average_water_usage(cursor):
         return f"The average water consumption per cycle is {avg_gallons} gallons."
     else:
         return "No dishwasher water usage data available."
+
+def electricity(cursor):
+    device_ids = ["fridge", "diswasher", "fridge_2"]
+    usage = {}
+
+    for device in device_ids: 
+        cursor.execute("""
+            SELECT SUM(energy_used) FROM device_data
+            WHERE device_id = %s
+        """, (device_id,))
+        result = cursor.fetchone()
+        usage [device] = result[0] if result[0] is not None else 0
+
+    most_elec = max(usage, key = usage.get)
+    kwh = round(usage[most_elec],2)
+    return f"{most_elec} consumed the most elecricity: {kwh} kwh."
+
+        
 def p_query(query,cursor): 
-    pass
+    query = query.lower()
+
+    if "average moisture" in query:
+        return get_average_moisture(cursor)
+    elif "average water" in query:
+        return get_average_water_usage(cursor)
+    elif "consumed more electricity" in query:
+        return compare_electricity(cursor)
+    else:
+        return ("Sorry, this query cannot be processed. Please try one of the following:\n"
+                "1. What is the average moisture inside my kitchen fridge in the past three hours?\n"
+                "2. What is the average water consumption per cycle in my smart dishwasher?\n"
+                "3. Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?")
 
 
 ###############TCP SET UP
