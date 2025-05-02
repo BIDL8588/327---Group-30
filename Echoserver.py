@@ -18,27 +18,28 @@ def database_conn():
 
 metadata = {
     "fridge": {
-        "device_id": "fridge",
+        "device_id": "89t-yx1-9k7-s46",
         "type": "moisture",
         "timezone": "UTC",
         "unit": "percentage"  
     },
     "dishwasher": {
-        "device_id": "dishwasher",
+        "device_id": "7a80c32e-90a0-49fc-90d1-4dd669e8f886",
         "type": "water",
         "timezone": "UTC",
         "unit": "liters"
     },
     "fridge_2": {
-        "device_id": "fridge_2",
+        "device_id": "bac88fe2-92b4-4a6f-8a4f-df8d627a1255",
         "type": "electricity",
         "timezone": "UTC",
         "unit": "kWh"
     }
 }
 def get_moisture(cursor): 
-    device_id = "fridge"
-
+    device_id = metadata["fridge"]["device_id"]
+    time_limit = date.time.utcnow() - timedelta(hours = 3)
+    
     cursor.execute(""" 
     SELECT AVG(moisture) FROM fridge_data
     WHERE device_id = %s AND timestamp >= %s
@@ -53,7 +54,7 @@ else:
 
 ##not official function
 def get_average_water_usage(cursor):
-    device_id = "dishwasher"
+    device_id = metadata["fridge"]["device_id"]
 
     cursor.execute("""
         SELECT AVG(water_used) FROM dishwasher_cycles
@@ -70,10 +71,9 @@ def get_average_water_usage(cursor):
         return "No dishwasher water usage data available."
 
 def electricity(cursor):
-    device_ids = ["fridge", "diswasher", "fridge_2"]
     usage = {}
 
-    for device in device_ids: 
+    for device in ["fridge", "diswasher", "fridge_2"]: 
         cursor.execute("""
             SELECT SUM(energy_used) FROM device_data
             WHERE device_id = %s
