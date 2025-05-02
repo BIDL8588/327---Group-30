@@ -18,22 +18,31 @@ except (ValueError, socket.error) as e:
 
 while True:
     print("\nPlease choose one of the following queries:")
-    for query in valid_queries:
-        print(f"- {query}")
+    for idx, query in enumerate(valid_queries, start=1):
+        print(f"{idx}. {query}")
 
     
-    message = input("\nEnter your query(or type 'exit' to quit): ").strip()# prompt user to enter message
-    if message.lower() == "exit":
-        break
+   try:
+        choice = int(input("\nEnter the number of your query (or type 'exit' to quit): ").strip())
+        
+        if choice == "exit":
+            break
+        if choice < 1 or choice > len(valid_queries):
+            print("Invalid choice, please select a number from the available options.")
+            continue
 
-    if message not in valid_queries: 
-        print("\n Sorry, this query can't be processed.")
-        print("Please try one of the following valid queries:")
-        for query in valid_queries:
-            print(f"- {query}")
-        continue
-    client_socket.send(message.encode('utf-8'))#send the message to the server encoding it
-    response = client_socket.recv(1024).decode('utf-8')# receive the response form the server and decode it
-    print(f"Server Response: {response}")
+        message = valid_queries[choice - 1]  
+        client_socket.send(message.encode('utf-8')) 
+
+        response = ''
+        while True:
+            chunk = client_socket.recv(1024).decode('utf-8')  
+            if not chunk:
+                break
+            response += chunk
+        print(f"Server Response: {response}")
+    
+    except ValueError:
+        print("Invalid input, please enter a number corresponding to the query.")
 
 client_socket.close()
