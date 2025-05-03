@@ -71,19 +71,26 @@ def get_average_water_usage(cursor):
 
 def electricity(cursor):
     usage = {}
-    for device in ["fridge", "dishwasher", "fridge_2"]:
+    electric_fields = {
+        "fridge": "ACS712 - Electric",
+        "fridge_2": "ACS712 - Electric2",
+        "dishwasher": "ACS712 - Electric3"
+    }
+
+    for device, field in electric_fields.items():
         device_id = metadata[device]["device_id"]
-        cursor.execute("""
-            SELECT SUM((payload->>'ACS712 - Electric')::float)
+        cursor.execute(f"""
+            SELECT SUM((payload->>%s)::float)
             FROM fridge_virtual
             WHERE payload->>'parent_asset_uid' = %s
-        """, (device_id,))
+        """, (field, device_id))
         result = cursor.fetchone()
         usage[device] = result[0] if result[0] is not None else 0
 
     most_elec = max(usage, key=usage.get)
     kwh = round(usage[most_elec], 2)
     return f"{most_elec} consumed the most electricity: {kwh} kWh."
+
 
 
 def p_query(query, cursor): 
