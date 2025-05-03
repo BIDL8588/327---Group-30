@@ -74,7 +74,7 @@ def electricity(cursor):
     for device in ["fridge", "dishwasher", "fridge_2"]:
         device_id = metadata[device]["device_id"]
         cursor.execute("""
-            SELECT SUMpayload->>'ACS712 - Electric') FROM fridge_virtual
+            SELECT SUM((payload->>'ACS712 - Electric')::float)
             WHERE device_id = %s
         """, (device_id,))
         result = cursor.fetchone()
