@@ -107,32 +107,33 @@ server_socket.bind((HOST, PORT))
 server_socket.listen(5)
 print(f"Server listening on {HOST}:{PORT}")
 
-client_socket, client_address = server_socket.accept() 
-print(f"Connection established with {client_address}")
-
-conn = connect_db()
-if not conn:
-    client_socket.send(b"Database connection failed.")
-    client_socket.close()
-    server_socket.close()
-    exit()
-
-cursor = conn.cursor()
-
 while True:
-    data = client_socket.recv(5000).decode('utf-8')
-    if not data:
-        break 
-    print(f"Received from client: {data}")
-    
-    response = p_query(data, cursor)
-    print(f"Response from p_query: {response}")
-    
-    client_socket.send(response.encode('utf-8')) 
+    client_socket, client_address = server_socket.accept()
+    print(f"Connection established with {client_address}")
 
+    conn = connect_db()
+    if not conn:
+        client_socket.send(b"Database connection failed.")
+        client_socket.close()
+        continue  
 
-# Cleanup
-cursor.close()
-conn.close()
-client_socket.close()
-server_socket.close()
+    cursor = conn.cursor()
+
+    while True:
+        try:
+            data = client_socket.recv(5000).decode('utf-8')
+            if not data or data.lower().strip() in ("exit", "quit"):
+                print(f"Client {client_address} disconnected.")
+                break
+
+            print(f"Received from client: {data}")
+            response = p_query(data, cursor)
+            print(f"Response from p_query: {response}")
+            client_socket.send(response.encode('utf-8'))
+        except Exception as e:
+            print(f"Error handling client {client_address}: {e}")
+            break
+
+    cursor.close()
+    conn.close()
+    client_socket.close()
