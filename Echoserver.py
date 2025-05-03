@@ -45,6 +45,8 @@ def get_moisture(cursor):
     """, (time_limit,))
     
     result = cursor.fetchone()
+    print(f"Query result: {result}")
+
     if result and result[0] is not None: 
         avg_moisture = round(result[0], 2)
         return f"The average moisture inside kitchen fridge in the past three hours is {avg_moisture} % RH."
@@ -122,8 +124,12 @@ while True:
     if not data:
         break 
     print(f"Received from client: {data}")
+    
     response = p_query(data, cursor)
+    print(f"Response from p_query: {response}")
+    
     client_socket.send(response.encode('utf-8')) 
+
 
 # Cleanup
 cursor.close()
