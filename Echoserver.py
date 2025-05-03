@@ -1,7 +1,6 @@
-
 import socket
 import psycopg2
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 DB_CONFIG = {
     'url': "postgresql://neondb_owner:npg_wnz8jmce2qHh@ep-bitter-pine-a539fzen-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
@@ -21,16 +20,20 @@ metadata = {
         "device_id": "89t-yx1-9k7-s46",
         "type": "moisture",
         "timezone": "UTC",
-        "unit": "percentage"  
+        "unit": "percentage",
+        "sensor_key": "DHT11 - DHT11-moisture",
+        "table": "Fridge_virtual"
     },
     "dishwasher": {
-        "device_id": "7a80c32e-90a0-49fc-90d1-4dd669e8f886",
+        "device_id": "9e729bba-71f8-44f4-9fb8-db7842e121cf",
         "type": "water",
         "timezone": "UTC",
-        "unit": "liters"
+        "unit": "liters",
+        "sensor_key": "YF-S201 - YFS201-Water",
+        "table": "Dishwasher_virtual"
     },
     "fridge_2": {
-        "device_id": "bac88fe2-92b4-4a6f-8a4f-df8d627a1255",
+        "device_id": "fe97fda9-9b5f-48ae-84dc-f9826711edef",
         "type": "electricity",
         "timezone": "UTC",
         "unit": "kWh"
@@ -38,15 +41,17 @@ metadata = {
 }
 
 def get_moisture(cursor): 
-    device_id = metadata["fridge"]["device_id"]
+    sensor_key = metadata["fridge"]["sensor_key"]
+    table = metadata["fridge"]["table"]
     time_limit = datetime.utcnow() - timedelta(hours=3)
-    
-    cursor.execute(""" 
-    SELECT AVG(moisture) FROM fridge_data
-    WHERE device_id = %s AND timestamp >= %s
-    """, (device_id, time_limit))
-    result = cursor.fetchone()
 
+    cursor.execute(f"""
+        SELECT AVG((payload->>%s)::float) 
+        FROM {table}
+        WHERE time >= %s
+    """, (sensor_key, time_limit))
+    
+    result = cursor.fetchone()
     if result and result[0] is not None: 
         avg_moisture = round(result[0], 2)
         return f"The average moisture inside kitchen fridge in the past three hours is {avg_moisture} % RH."
@@ -54,15 +59,20 @@ def get_moisture(cursor):
         return "No moisture data available in the past three hours."
 
 def get_average_water_usage(cursor):
-    device_id = metadata["dishwasher"]["device_id"]
-    cursor.execute("""
-        SELECT AVG(water_used) FROM dishwasher_cycles
-        WHERE device_id = %s
-    """, (device_id,))
-    result = cursor.fetchone()
+    sensor_key = metadata["dishwasher"]["sensor_key"]
+    table = metadata["dishwasher"]["table"]
+    time_limit = datetime.now(timezone.utc) - timedelta(days=1)
 
+    cursor.execute(f"""
+        SELECT AVG((payload->>%s)::float)
+        FROM {table}
+        WHERE time >= %s
+    """, (sensor_key, time_limit))
+    
+    result = cursor.fetchone()
     if result and result[0] is not None:
-        avg_gallons = round(result[0] * 0.264172, 2)
+        avg_liters = result[0]
+        avg_gallons = round(avg_liters * 0.264172, 2)
         return f"The average water consumption per cycle is {avg_gallons} gallons."
     else:
         return "No dishwasher water usage data available."
@@ -117,15 +127,16 @@ if not conn:
 
 cursor = conn.cursor()
 
-while True:
-    data = client_socket.recv(5000).decode('utf-8')
-    if not data:
-        break 
-    print(f"Received from client: {data}")
-    response = p_query(data, cursor)
-    client_socket.send(response.encode('utf-8')) 
-
-cursor.close()
-conn.close()
-client_socket.close()
-server_socket.close()
+try:
+    while True:
+        data = client_socket.recv(5000).decode('utf-8')
+        if not data:
+            break 
+        print(f"Received from client: {data}")
+        response = p_query(data, cursor)
+        client_socket.send(response.encode('utf-8')) 
+finally:
+    cursor.close()
+    conn.close()
+    client_socket.close()
+    server_socket.close()
