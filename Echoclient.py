@@ -25,6 +25,7 @@ while True:
     choice = input("\nEnter the number of your query (or type 'exit' to quit): ").strip()
 
     if choice.lower() == 'exit':
+        client_socket.send(b'exit')  
         break
 
     try:
@@ -34,12 +35,8 @@ while True:
             continue
         message = valid_queries[choice - 1]
         client_socket.send(message.encode('utf-8'))
-        response = ''
-        while True:
-            piece = client_socket.recv(1024).decode('utf-8')
-            if not piece:
-                break
-            response += piece
+
+        response = client_socket.recv(4096).decode('utf-8')
         print(f"Server Response: {response}")
     
     except ValueError:
