@@ -41,24 +41,25 @@ metadata = {
 }
 
 def get_moisture(cursor):
-    device = metadata['fridge']
-    table = device['table']
-    sensor_key = device['sensor_key']
+    metadata_entry = metadata["fridge"]
+    table = metadata_entry["table"]
+    sensor_key = metadata_entry["sensor_key"]
     time_limit = datetime.utcnow() - timedelta(hours=3)
 
-    query = f'''
-        SELECT AVG((payload->>%s)::float)
-        FROM "{table}"
+    query = f"""
+        SELECT AVG((payload->>'{sensor_key}')::float)
+        FROM {table}
         WHERE time >= %s
-    '''
-    cursor.execute(query, (sensor_key, time_limit))
+    """
+    cursor.execute(query, (time_limit,))
     result = cursor.fetchone()
 
-    if result and result[0] is not None: 
+    if result and result[0] is not None:
         avg_moisture = round(result[0], 2)
         return f"The average moisture inside kitchen fridge in the past three hours is {avg_moisture} % RH."
     else:
         return "No moisture data available in the past three hours."
+
 
 
 
