@@ -75,7 +75,8 @@ def electricity(cursor):
         device_id = metadata[device]["device_id"]
         cursor.execute("""
             SELECT SUM((payload->>'ACS712 - Electric')::float)
-            WHERE device_id = %s
+            FROM fridge_virtual
+            WHERE payload->>'parent_asset_uid' = %s
         """, (device_id,))
         result = cursor.fetchone()
         usage[device] = result[0] if result[0] is not None else 0
@@ -83,6 +84,7 @@ def electricity(cursor):
     most_elec = max(usage, key=usage.get)
     kwh = round(usage[most_elec], 2)
     return f"{most_elec} consumed the most electricity: {kwh} kWh."
+
 
 def p_query(query, cursor): 
     query = query.lower()
