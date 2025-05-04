@@ -17,22 +17,13 @@ def connect_db():
 
 metadata = {
     "fridge": {
-        "device_id": "89t-yx1-9k7-s46",
-        "type": "moisture",
-        "timezone": "UTC",
-        "unit": "percentage"
+        "device_id": "89t-yx1-9k7-s46"
     },
     "dishwasher": {
-        "device_id": "9e729bba-71f8-44f4-9fb8-db7842e121cf",
-        "type": "water",
-        "timezone": "UTC",
-        "unit": "liters"
+        "device_id": "9e729bba-71f8-44f4-9fb8-db7842e121cf"
     },
     "fridge_2": {
-        "device_id": "fe97fda9-9b5f-48ae-84dc-f9826711edef",
-        "type": "electricity",
-        "timezone": "UTC",
-        "unit": "kWh"
+        "device_id": "fe97fda9-9b5f-48ae-84dc-f9826711edef"
     }
 }
 
