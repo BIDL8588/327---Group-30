@@ -1,1 +1,1 @@
-# 327---Group-30
+To run our code just install Python on your computer and run the Echoclient.py and Echoserver.py. The echoserver is configured to listen on the IP of our VM.  The echoclient asks for users to input the IP and port they want to connect to. 
