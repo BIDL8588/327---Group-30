@@ -117,7 +117,7 @@ while True:
         client_socket.close()
         continue  
 
-    cursor = conn.cursor()
+
 
     while True:
         try:
@@ -127,7 +127,9 @@ while True:
                 break
 
             print(f"Received from client: {data}")
+            cursor = conn.cursor()
             response = p_query(data, cursor)
+            cursor.close()
             print(f"Response from p_query: {response}")
             client_socket.send(response.encode('utf-8'))
         except Exception as e:
